@@ -4,6 +4,11 @@ import { useRef, useState } from "react"
 import { useFrame, MeshProps } from "@react-three/fiber"
 import * as THREE from "three"
 
+interface Album {
+  cover: string
+  // Add other properties of Album if needed
+}
+
 interface AlbumCoverProps extends MeshProps {
   album: Album
   onClick: () => void
