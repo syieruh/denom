@@ -1,11 +1,10 @@
 "use client"
 
 import { useRef, useState } from "react"
-import { useFrame, type ThreeElements } from "@react-three/fiber"
-import type { Album } from "../types/Album"
+import { useFrame, MeshProps } from "@react-three/fiber"
 import * as THREE from "three"
 
-interface AlbumCoverProps extends ThreeElements.MeshProps {
+interface AlbumCoverProps extends MeshProps {
   album: Album
   onClick: () => void
 }
