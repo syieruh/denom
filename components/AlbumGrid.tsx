@@ -12,6 +12,8 @@ interface AlbumGridProps {
 export default function AlbumGrid({ albums }: AlbumGridProps) {
   const [selectedAlbum, setSelectedAlbum] = useState<Album | null>(null)
   const [previewPosition] = useState({ x: 0, y: 0, z: 0 })
+  const [isFullscreen, setIsFullscreen] = useState(false)
+  const [isPlaying, setIsPlaying] = useState(false)
 
   return (
     <div>
@@ -40,6 +42,8 @@ export default function AlbumGrid({ albums }: AlbumGridProps) {
           album={selectedAlbum} 
           onClose={() => setSelectedAlbum(null)} 
           initialPosition={previewPosition}
+          onPlayingChange={setIsPlaying}
+          isFullscreen={isFullscreen}
         />
       )}
     </div>
