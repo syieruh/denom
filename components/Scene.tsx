@@ -184,44 +184,14 @@ export default function Scene() {
   // Function to fetch albums from API
   const fetchAlbums = async () => {
     try {
-      const response = await fetch('/api/scan-audio', {
-        headers: {
-          'Cache-Control': 'no-cache',
-          'Pragma': 'no-cache'
-        }
-      })
-      
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`)
-      }
-      
+      const response = await fetch('/api/scan-audio')
       const data = await response.json()
-      console.log('Fetched data:', data)
-      
-      if (data.albums?.length > 0) {
-        // Validate album data structure
-        const validAlbums = data.albums.filter(album => 
-          album && 
-          album.id && 
-          album.title && 
-          album.audioPath &&
-          typeof album.audioPath === 'string'
-        )
-        
-        if (validAlbums.length > 0) {
-          console.log('Setting valid albums:', validAlbums)
-          setAlbums(validAlbums)
-        } else {
-          console.warn('No valid albums found in response')
-          setAlbums(defaultAlbums)
-        }
-      } else {
-        console.log('No albums found, using default albums')
-        setAlbums(defaultAlbums)
+      if (data.albums) {  // Changed condition
+        setAlbums(data.albums)
+        console.log('Loaded albums:', data.albums)
       }
     } catch (error) {
       console.error('Error fetching albums:', error)
-      setAlbums(defaultAlbums)
     }
   }
 
@@ -539,3 +509,4 @@ function ActiveCard({ album, setPreviewPosition }: any) {
     </group>
   )
 }
+ 

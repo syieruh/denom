@@ -17,28 +17,33 @@ export default function MusicPlayer({ album, onClose, initialPosition, onPlaying
   const [showLyrics, setShowLyrics] = useState(false)
   const audioRef = useRef<HTMLAudioElement>(null)
 
-  // Inside useEffect:
   useEffect(() => {
     console.log("Loading audio:", album.audioPath)
     
-    if (!album.audioPath) {
-      console.error('Invalid audio path')
-      setError('Invalid audio file')
-      return
-    }
-  
     if (audioRef.current) {
       audioRef.current.load() // Force reload when album changes
+      audioRef.current.volume = 1.0 // Ensure volume is set
       
-      // Add event listeners for debugging
-      audioRef.current.addEventListener('loadstart', () => console.log('Audio loading started'))
-      audioRef.current.addEventListener('loadeddata', () => console.log('Audio data loaded'))
-      audioRef.current.addEventListener('canplay', () => console.log('Audio can play'))
-      audioRef.current.addEventListener('playing', () => console.log('Audio playing'))
-      audioRef.current.addEventListener('error', (e) => console.error('Audio error:', e))
-      audioRef.current.addEventListener('timeupdate', () => {
+      const handleLoadStart = () => console.log('Audio loading started')
+      const handleLoadedData = () => console.log('Audio data loaded')
+      const handleCanPlay = () => console.log('Audio can play')
+      const handlePlaying = () => console.log('Audio playing')
+      const handleError = (e: Event) => {
+        const error = (e.target as HTMLAudioElement).error
+        console.error("Audio error:", error)
+        setError(`Failed to load audio: ${error?.message || 'Unknown error'}`)
+      }
+      const handleTimeUpdate = () => {
         setCurrentTime(audioRef.current?.currentTime || 0)
-      })
+      }
+      
+      // Add event listeners
+      audioRef.current.addEventListener('loadstart', handleLoadStart)
+      audioRef.current.addEventListener('loadeddata', handleLoadedData)
+      audioRef.current.addEventListener('canplay', handleCanPlay)
+      audioRef.current.addEventListener('playing', handlePlaying)
+      audioRef.current.addEventListener('error', handleError)
+      audioRef.current.addEventListener('timeupdate', handleTimeUpdate)
       
       if (isPlaying) {
         console.log("Attempting to play audio")
@@ -49,7 +54,7 @@ export default function MusicPlayer({ album, onClose, initialPosition, onPlaying
               console.log("Audio playback started successfully")
               onPlayingChange(true)
             })
-            .catch(error => {
+            .catch((error: Error) => {
               console.error("Audio playback error:", error)
               setError(`Failed to play audio: ${error.message}`)
               setIsPlaying(false)
@@ -60,17 +65,17 @@ export default function MusicPlayer({ album, onClose, initialPosition, onPlaying
         audioRef.current.pause()
         onPlayingChange(false)
       }
-    }
-    
-    // Cleanup event listeners
-    return () => {
-      if (audioRef.current) {
-        audioRef.current.removeEventListener('loadstart', () => {})
-        audioRef.current.removeEventListener('loadeddata', () => {})
-        audioRef.current.removeEventListener('canplay', () => {})
-        audioRef.current.removeEventListener('playing', () => {})
-        audioRef.current.removeEventListener('error', () => {})
-        audioRef.current.removeEventListener('timeupdate', () => {})
+      
+      // Cleanup event listeners
+      return () => {
+        if (audioRef.current) {
+          audioRef.current.removeEventListener('loadstart', handleLoadStart)
+          audioRef.current.removeEventListener('loadeddata', handleLoadedData)
+          audioRef.current.removeEventListener('canplay', handleCanPlay)
+          audioRef.current.removeEventListener('playing', handlePlaying)
+          audioRef.current.removeEventListener('error', handleError)
+          audioRef.current.removeEventListener('timeupdate', handleTimeUpdate)
+        }
       }
     }
   }, [isPlaying, album.audioPath, onPlayingChange])
