@@ -83,8 +83,8 @@ export default function MusicPlayer({ album, onClose, initialPosition, onPlaying
           <div className="flex items-center space-x-4">
             <img src={album.cover} alt={album.title} className="w-16 h-16 rounded-lg" />
             <div>
-              <h3 className="font-bold">{album.title}</h3>
-              <p className="text-gray-300">{album.artist}</p>
+              <h3 className="font-bold text-white text-lg tracking-wide">{album.title}</h3>
+              <p className="text-white/90 font-medium text-sm tracking-wide">{album.artist}</p>
               {error && <p className="text-red-500 text-sm mt-1">{error}</p>}
             </div>
           </div>

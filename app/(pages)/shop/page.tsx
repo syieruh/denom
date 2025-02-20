@@ -27,7 +27,7 @@ const products = [
 
 export default function ShopPage() {
   return (
-    <div className="min-h-screen bg-gradient-to-b from-[#000020] to-black text-white p-8 pl-32">
+    <div className="min-h-screen bg-black text-white p-8 pl-32">
       <div className="max-w-6xl mx-auto">
         <h1 className="text-4xl font-bold mb-8">Shop</h1>
         

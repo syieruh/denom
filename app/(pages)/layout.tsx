@@ -10,7 +10,7 @@ export default function PagesLayout({
   children: React.ReactNode
 }) {
   return (
-    <div className="min-h-screen bg-gradient-to-b from-[#000020] to-black">
+    <div className="min-h-screen bg-[#000000]" style={{ backgroundColor: '#000000' }}>
       <Menu />
       {children}
     </div>

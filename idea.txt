@@ -1,0 +1,5 @@
+Website for labels,
+  similar carousel like
+ interactive planets ,
+  which when clicked 
+  will open a specific artist discography

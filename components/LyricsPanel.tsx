@@ -15,6 +15,14 @@ interface LyricsPanelProps {
 export default function LyricsPanel({ album, isFullscreen, currentTime, isVisible, onClose }: LyricsPanelProps) {
   const [activeLyricIndex, setActiveLyricIndex] = useState<number>(-1)
   const lyricsRef = useRef<HTMLDivElement>(null)
+  const [screenWidth, setScreenWidth] = useState(0)
+
+  useEffect(() => {
+    const updateWidth = () => setScreenWidth(window.innerWidth)
+    updateWidth()
+    window.addEventListener('resize', updateWidth)
+    return () => window.removeEventListener('resize', updateWidth)
+  }, [])
 
   useEffect(() => {
     if (!album.lyrics) return
@@ -25,70 +33,66 @@ export default function LyricsPanel({ album, isFullscreen, currentTime, isVisibl
     
     if (index !== activeLyricIndex) {
       setActiveLyricIndex(index)
-      const lyricElement = lyricsRef.current?.children[0]?.children[index]
+      const lyricElement = lyricsRef.current?.children[index]
       lyricElement?.scrollIntoView({ behavior: 'smooth', block: 'center' })
     }
   }, [currentTime, album.lyrics, activeLyricIndex])
 
   if (!isVisible || !album.lyrics) return null
 
+  const panelWidth = screenWidth <= 640 ? '100%' : screenWidth <= 1024 ? '50%' : '400px'
+
   return (
     <AnimatePresence>
       <motion.div
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        exit={{ opacity: 0 }}
-        transition={{ duration: 0.2 }}
-        className="fixed top-0 left-0 right-0 bottom-0 z-40 overflow-hidden"
+        initial={{ opacity: 0, x: '100%' }}
+        animate={{ opacity: 1, x: 0 }}
+        exit={{ opacity: 0, x: '100%' }}
+        transition={{ type: 'spring', damping: 21 }}
+        className={`fixed right-0 top-0 bg-black/80 backdrop-blur-xl text-white p-6 overflow-y-auto z-[51] ${
+          isFullscreen ? 'h-screen' : 'h-[calc(100vh-96px)]'
+        }`}
+        style={{ 
+          width: panelWidth,
+          bottom: isFullscreen ? '0' : '80px'  // Add space for the player
+        }}
       >
-        {/* Background blur layer - separated for better performance */}
-        <div 
-          className="absolute top-0 left-0 right-0 bottom-[96px] w-screen h-[calc(100%-96px)]"
-          style={{ 
-            background: isFullscreen ? 'rgba(0, 0, 0, 0.21)' : 'rgba(0, 0, 0, 0.4)',
-            backdropFilter: 'blur(16px)',
-            WebkitBackdropFilter: 'blur(16px)', // For Safari
-            transform: 'translateZ(0)', // Force GPU acceleration
-          }} 
-        />
-
-        {/* Content container */}
-        <div className="absolute top-0 left-0 right-0 bottom-[96px] flex items-center justify-center">
-          <motion.div 
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.3, delay: 0.1 }}
-            className={`w-full h-full max-h-screen flex items-center justify-center px-4 ${
-              isFullscreen 
-                ? 'max-w-4xl' 
-                : 'max-w-2xl'
-            }`}
+        <div className="flex justify-between items-center mb-6">
+          <h3 className="text-xl font-bold">Lyrics</h3>
+          <button
+            onClick={onClose}
+            className="p-2 hover:bg-white/10 rounded-full transition-colors"
           >
-            <div 
-              ref={lyricsRef}
-              className="w-full h-full max-h-[75vh] overflow-y-auto scrollbar-hide py-4"
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              className="h-6 w-6"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
             >
-              <div className="flex flex-col items-center justify-center min-h-full space-y-6 md:space-y-8">
-                {album.lyrics.map((line, index) => (
-                  <motion.div
-                    key={index}
-                    initial={{ opacity: 0.4 }}
-                    animate={{ 
-                      opacity: index === activeLyricIndex ? 1 : 0.4,
-                    }}
-                    transition={{ duration: 0.4 }}
-                    className={`text-center transition-all duration-300 px-4 py-1
-                      ${index === activeLyricIndex
-                        ? 'text-white font-medium text-xl md:text-3xl lg:text-4xl tracking-tight'
-                        : 'text-white/60 text-base md:text-xl lg:text-2xl tracking-normal'
-                      }`}
-                  >
-                    {line.text}
-                  </motion.div>
-                ))}
-              </div>
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M6 18L18 6M6 6l12 12"
+              />
+            </svg>
+          </button>
+        </div>
+
+        <div ref={lyricsRef} className="space-y-4">
+          {album.lyrics.map((lyric, index) => (
+            <div
+              key={lyric.startTime}
+              className={`transition-all duration-300 ${
+                index === activeLyricIndex
+                  ? 'text-white text-lg font-medium'
+                  : 'text-white/40 text-base'
+              }`}
+            >
+              {lyric.text}
             </div>
-          </motion.div>
+          ))}
         </div>
       </motion.div>
     </AnimatePresence>
