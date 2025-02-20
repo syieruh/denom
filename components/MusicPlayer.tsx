@@ -17,9 +17,16 @@ export default function MusicPlayer({ album, onClose, initialPosition, onPlaying
   const [showLyrics, setShowLyrics] = useState(false)
   const audioRef = useRef<HTMLAudioElement>(null)
 
+  // Inside useEffect:
   useEffect(() => {
     console.log("Loading audio:", album.audioPath)
     
+    if (!album.audioPath) {
+      console.error('Invalid audio path')
+      setError('Invalid audio file')
+      return
+    }
+  
     if (audioRef.current) {
       audioRef.current.load() // Force reload when album changes
       
