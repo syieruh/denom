@@ -35,32 +35,19 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
           const buffer = fs.readFileSync(filePath)
           const metadata = await parseBuffer(new Uint8Array(buffer))
           
-          // Extract title and artist from metadata or filename
-          const title = metadata.common.title || path.parse(file).name
-          const artist = metadata.common.artist || 'Unknown Artist'
-          
-          // Get album art if available, otherwise use placeholder
-          let cover = '/placeholder.svg?height=300&width=300&text=' + encodeURIComponent(title)
-          if (metadata.common.picture && metadata.common.picture.length > 0) {
-            // Convert the first picture to base64
-            const picture = metadata.common.picture[0]
-            const base64 = Buffer.from(picture.data).toString('base64')
-            cover = `data:${picture.format};base64,${base64}`
-          }
-
           return {
-            id: String(index + 1),
-            title,
-            artist,
-            cover,
+            id: file, // Changed from String(index + 1) to use filename as ID
+            title: path.parse(file).name, // Use filename directly
+            artist: metadata.common.artist || 'Unknown Artist',
+            cover: '/placeholder.svg?height=300&width=300&text=' + encodeURIComponent(path.parse(file).name),
             audioPath: `/audio/${file}`,
-            lyrics: [] // Add lyrics if available in metadata
+            lyrics: [] // Empty lyrics array but won't affect playback
           }
         } catch (error) {
           console.error(`Error processing file ${file}:`, error)
-          // Return basic info if metadata parsing fails
+          // Simplified fallback that still allows playback
           return {
-            id: String(index + 1),
+            id: file,
             title: path.parse(file).name,
             artist: 'Unknown Artist',
             cover: '/placeholder.svg?height=300&width=300&text=' + encodeURIComponent(path.parse(file).name),

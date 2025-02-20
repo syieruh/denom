@@ -186,19 +186,20 @@ export default function Scene() {
     try {
       const response = await fetch('/api/scan-audio')
       const data = await response.json()
-      if (data.albums && data.albums.length > 0) {
+      if (data.albums) {  // Changed condition
         setAlbums(data.albums)
+        console.log('Loaded albums:', data.albums)
       }
     } catch (error) {
       console.error('Error fetching albums:', error)
     }
   }
 
-  // Fetch albums on mount and every 5 seconds
   useEffect(() => {
     fetchAlbums()
-    const intervalId = setInterval(fetchAlbums, 5000)
-    return () => clearInterval(intervalId)
+    // Remove the interval to prevent multiple scans
+    // const intervalId = setInterval(fetchAlbums, 5000)
+    // return () => clearInterval(intervalId)
   }, [])
 
   return (

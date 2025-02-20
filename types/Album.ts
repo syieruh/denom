@@ -7,10 +7,14 @@ export interface LyricLine {
 export interface Album {
   id: string
   title: string
-  artist: string
+  artist?: string
   cover: string
   audioPath: string
-  lyrics?: LyricLine[]
+  lyrics?: Array<{
+    text: string
+    startTime: number
+    endTime: number
+  }>
 }
 
 export interface Position3D {
