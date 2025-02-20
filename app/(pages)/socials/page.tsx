@@ -60,23 +60,29 @@ export default function SocialsPage() {
   
 
   return (
-    <div className="min-h-screen bg-black text-white flex flex-col items-center justify-center p-8">
-      <h1 className="text-4xl font-bold mb-12">Connect with Shxaib!</h1>
-      <div className="grid grid-cols-3 gap-8">
-        {socials.map((social) => (
-          <a
-            key={social.name}
-            href={social.url}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="flex flex-col items-center gap-2 p-4 rounded-xl hover:bg-white/5 transition-all duration-300"
-          >
-            <div className="text-white/80 hover:text-white transition-colors">
-              {social.icon}
-            </div>
-            <span className="text-sm font-medium">{social.name}</span>
-          </a>
-        ))}
+    
+    <div className="min-h-screen bg-black text-white flex items-center justify-center">
+      <div className="max-w-2xl px-6 py-16 text-center space-y-8">
+        <h1 className="text-4xl font-bold tracking-tight bg-gradient-to-r from-purple-400 via-pink-500 to-red-500 bg-clip-text text-transparent">
+          Connect with Shxaib!
+        </h1>
+        
+        <div className="grid grid-cols-3 gap-8 pt-4">
+          {socials.map((social) => (
+            <a
+              key={social.name}
+              href={social.url}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex flex-col items-center gap-2 p-4 rounded-xl hover:bg-white/5 transition-all duration-300"
+            >
+              <div className="text-white/80 hover:text-white transition-colors">
+                {social.icon}
+              </div>
+              <span className="text-sm font-medium text-gray-300">{social.name}</span>
+            </a>
+          ))}
+        </div>
       </div>
     </div>
   )

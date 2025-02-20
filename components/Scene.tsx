@@ -144,9 +144,11 @@ export default function Scene() {
   }
 
   const toggleFullscreen = () => {
-    if (!document.fullscreenElement) {
+    const docElement = document.documentElement as WebkitHTMLElement;
+    const doc = document as WebkitDocument;
+
+    if (!document.fullscreenElement && !doc.webkitFullscreenElement) {
       try {
-        const docElement = document.documentElement as WebkitHTMLElement;
         // Try standard fullscreen API first
         if (docElement.requestFullscreen) {
           docElement.requestFullscreen();
@@ -155,22 +157,14 @@ export default function Scene() {
         else if (docElement.webkitRequestFullscreen) {
           docElement.webkitRequestFullscreen();
         }
-        // Fallback for iOS - use viewport meta tag
-        else {
-          const meta = document.createElement('meta');
-          meta.name = 'viewport';
-          meta.content = 'width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no';
-          document.getElementsByTagName('head')[0].appendChild(meta);
-        }
         setIsFullscreen(true);
       } catch (err) {
         console.warn('Fullscreen not supported:', err);
       }
     } else {
       try {
-        const doc = document as WebkitDocument;
-        if (doc.exitFullscreen) {
-          doc.exitFullscreen();
+        if (document.exitFullscreen) {
+          document.exitFullscreen();
         } else if (doc.webkitExitFullscreen) {
           doc.webkitExitFullscreen();
         }
