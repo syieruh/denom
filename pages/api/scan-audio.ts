@@ -3,6 +3,9 @@ import fs from 'fs'
 import path from 'path'
 import { parseBuffer } from 'music-metadata'
 
+// Add LYRICS_DIR constant
+const LYRICS_DIR = path.join(process.cwd(), 'public', 'lyrics')
+
 // Define the audio directory path relative to public folder
 const AUDIO_DIR = path.join(process.cwd(), 'public', 'audio')
 
@@ -30,6 +33,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     const albums = await Promise.all(
       audioFiles.map(async (file, index) => {
         const filePath = path.join(AUDIO_DIR, file)
+        // Inside the audioFiles.map callback, modify the return object:
         try {
           const buffer = fs.readFileSync(filePath)
           const metadata = await parseBuffer(new Uint8Array(buffer))
@@ -55,14 +59,22 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
             fs.writeFileSync(coverPath, imageBuffer)
             coverUrl = `/covers/${coverFileName}`
           }
-
+      
+          // Add lyrics parsing
+          let lyrics = []
+          const lyricsFile = path.join(LYRICS_DIR, `${path.parse(file).name}.lrc`)
+          if (fs.existsSync(lyricsFile)) {
+            const lrcContent = fs.readFileSync(lyricsFile, 'utf-8')
+            lyrics = parseLRC(lrcContent)
+          }
+          
           return {
             id: file,
             title: metadata.common.title || path.parse(file).name,
             artist: metadata.common.artist || 'Unknown Artist',
             cover: coverUrl,
             audioPath: `/audio/${file}`,
-            lyrics: []
+            lyrics: lyrics
           }
         } catch (error) {
           console.error(`Error processing file ${file}:`, error)
@@ -84,4 +96,49 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     console.error('Error scanning audio directory:', error)
     res.status(500).json({ message: 'Error scanning audio directory', error: String(error) })
   }
+}
+
+// Add this helper function at the bottom of the file
+// Update the parseLRC function
+function parseLRC(lrcContent: string) {
+  const lines = lrcContent.split('\n')
+  const lyrics = []
+  
+  for (const line of lines) {
+    // Skip metadata lines and empty lines
+    if (!line.trim() || line.startsWith('[ti:') || 
+        line.startsWith('[ar:') || line.startsWith('[al:') || 
+        line.startsWith('[by:') || line.startsWith('[re:') || 
+        line.startsWith('[ve:') || line.startsWith('[la:')) {
+      continue
+    }
+    
+    // Parse timestamp and text
+    const match = line.match(/^\[(\d{2}):(\d{2})\.(\d{2})\](.*)/)
+    if (match) {
+      const minutes = parseInt(match[1])
+      const seconds = parseInt(match[2])
+      const centiseconds = parseInt(match[3])
+      
+      // Extract only the main text and combine words that have timestamps
+      let text = match[4].trim()
+      text = text.replace(/<\d{2}:\d{2}\.\d{2}>/g, '') // Remove timestamp tags
+      text = text.split(/\s+<\d{2}:\d{2}\.\d{2}>/g).join(' ') // Join split words
+      text = text.trim()
+      
+      // Convert to milliseconds
+      const startTime = (minutes * 60 * 1000) + (seconds * 1000) + (centiseconds * 10)
+      const endTime = startTime + 3000 // 3 seconds duration for each line
+      
+      if (text) {
+        lyrics.push({
+          text,
+          startTime,
+          endTime
+        })
+      }
+    }
+  }
+  
+  return lyrics
 }
