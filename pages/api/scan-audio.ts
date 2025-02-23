@@ -60,8 +60,8 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
             coverUrl = `/covers/${coverFileName}`
           }
       
-          // Add lyrics parsing
-          let lyrics = []
+          // Add lyrics parsing with proper typing
+          let lyrics: LyricLine[] = []
           const lyricsFile = path.join(LYRICS_DIR, `${path.parse(file).name}.lrc`)
           if (fs.existsSync(lyricsFile)) {
             const lrcContent = fs.readFileSync(lyricsFile, 'utf-8')
@@ -100,7 +100,14 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
 // Add this helper function at the bottom of the file
 // Update the parseLRC function
-function parseLRC(lrcContent: string) {
+// Add interface for lyrics
+interface LyricLine {
+  text: string
+  startTime: number
+  endTime: number
+}
+
+function parseLRC(lrcContent: string): LyricLine[] {
   const lines = lrcContent.split('\n')
   const lyrics = []
   
